@@ -8,7 +8,7 @@ $(function() {
 
   // Close
   $('.control-2').on('click', function() {
-    close()
+    socket.emit('pause', '')
   })
 
   // Zero

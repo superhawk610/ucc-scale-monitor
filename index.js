@@ -1,6 +1,6 @@
 // Constants
 const webPort = 5000
-const socketPort = 5001
+const socketPort = 5000
 const serialPort = '/dev/ttyUSB0'
 
 const path = require('path')
@@ -10,19 +10,26 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
 const serial = require('serialport')
-const port = new serial(serialPort)
+const port = new serial(serialPort, {
+  parser: serial.parsers.readline('\n')
+})
 
 // Serial Port
 
 port.on('open', () => {
-  port.write('CP', (err) => {
-    if (err) return console.log(err)
-    console.log('Continuous printing requested successfully')
-  })
+  setTimeout(() => {
+    port.write('CP\n', (err) => {
+      if (err) return console.log(err)
+      console.log('Continuous printing requested successfully')
+    })
+  }, 2000)
 })
 
 port.on('data', (data) => {
-  io.emit('display', data.split(' ').shift())
+  //console.log(data.toString())
+  if(data.indexOf(' lb') > -1) {
+    io.emit('display', data.toString().trim().split(' ').slice(0, 2).join(' '))
+  }
 })
 
 port.on('error', (err) => {
@@ -40,10 +47,10 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A client connected')
   socket.on('serialconnect', (msg) => {
-    console.log('Attempting connection to serial port at', serialPort)
-    port.open((err) => {
-      if (err) return console.log('Error opening port: ', err)
+      port.write('CP\n')
     })
+  socket.on('pause', (msg) => {
+      port.write('0P\n')
   })
   socket.on('command', (msg) => {
     console.log('Sending signal to port:', msg)
