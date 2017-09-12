@@ -6,6 +6,7 @@ const serialPort = '/dev/ttyUSB0'
 const path = require('path')
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
@@ -13,6 +14,8 @@ const serial = require('serialport')
 const port = new serial(serialPort, {
   parser: serial.parsers.readline('\n')
 })
+
+app.use(bodyParser.urlencoded({ extended: false }))
 
 // Serial Port
 
@@ -42,6 +45,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'))
+})
+
+app.post('/', (req, res) => {
+  io.emit('notify', req.body.payload)
+  res.sendStatus(200)
 })
 
 io.on('connection', (socket) => {
