@@ -1,4 +1,5 @@
 // Constants
+
 const webPort = 5000
 const socketPort = 5000
 const serialPort = '/dev/ttyUSB0'
@@ -45,6 +46,14 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'))
+})
+
+app.get('/warehouse', (req, res) => {
+  res.sendFile(path.join(__dirname, 'warehouse.html'))
+})
+
+app.get('/splash', (req, res) => {
+  res.sendFile(path.join(__dirname, 'splash.html'))
 })
 
 app.post('/', (req, res) => {

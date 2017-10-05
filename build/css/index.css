@@ -15,13 +15,21 @@ body {
   font-size: 10vh;
   position: absolute;
   top: 0; left: 0;
-  z-index: 10;
   background: #323b7c;
   width: 100%;
-  color: #fff;
+  height: 100%;
+  color: rgb(238, 185, 39);
   text-align: center;
   padding: 32vh 0;
   box-sizing: border-box;
+}
+
+#clock {
+  position: fixed;
+  top: 0; left: 0;
+  padding: 40px;
+  font-size: 5vh;
+  color: #fff;
 }
 
 #output {
@@ -29,7 +37,6 @@ body {
 }
 
 #display {
-  display: none;
   background: #eeebd3;
   height: 100vh;
   padding: 25px;

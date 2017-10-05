@@ -1,1 +1,1 @@
-var socket=io();window.onload=function(){socket.on("display",function(o){$("#output").text(o)}),socket.on("notify",function(o){$("#notify").text(o)})};
+function tick(){var t=new Date,n=t.getHours(),o=t.getMinutes(),c="AM";n>12&&(c="PM",n-=12),12==n&&(c="PM"),0==n&&(n=12),$("#clock").text(n+":"+pad(o)+" "+c),setTimeout(function(){tick()},1e3)}function pad(t){return t<10&&(t="0"+t),t}var socket=io();window.onload=function(){socket.on("display",function(t){$("#output").text(t)}),socket.on("notify",function(t){$("#notify").text(t)}),$("#clock").length&&tick()};
