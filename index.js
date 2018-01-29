@@ -31,7 +31,8 @@ port.on('open', () => {
 
 port.on('data', (data) => {
   //console.log(data.toString())
-  if(data.indexOf(' lb') > -1) {
+  if(data.match(/\s(lb|kg)/)) {
+  //if(data.indexOf(' lb') > -1) {
     io.emit('display', data.toString().trim().split(' ').slice(0, 2).join(' '))
   }
 })
@@ -46,6 +47,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'))
+})
+
+app.get('/black', (req, res) => {
+  res.sendFile(path.join(__dirname, 'black.html'))
 })
 
 app.get('/warehouse', (req, res) => {
