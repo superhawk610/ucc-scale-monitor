@@ -12,13 +12,11 @@ const express = require('express')
 const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-const serial = require('serialport')
-const port = new serial(serialPort, {
-  parser: serial.parsers.readline('\n')
-})
+const SerialPort = require('serialport')
+const Readline = require('@serialport/parser-readline')
 
-const port = 5000
-const serialPorts = ['/dev/ttyUSB0']
+const webPort = 5000
+const serialPortAddresses = ['/dev/ttyUSB0']
 
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -54,20 +52,25 @@ const onData = port => data =>
 
 const onError = port => err => log('serial', `Error on ${port}: ${err.message}`)
 
+const serialPorts = serialPortAddresses.map(address =>
+  new SerialPort(address, onError(address)).pipe(
+    new Readline({ delimiter: '\n' })
+  )
+)
+
 serialPorts.forEach(port => {
   port.on('open', onOpen(port))
   port.on('data', onData(port))
-  port.on('error', onError(port))
 })
 
 io.on('connection', socket => {
   log('socket', `A client connected from ${socket.handshake.address}`)
-  io.emit('init', serialPorts)
+  io.emit('init', serialPortAddresses)
   socket.on('disconnect', () =>
     log('socket', `The client at ${socket.handshake.address} disconnected`)
   )
 })
 
-server.listen(port, () =>
-  log('server', `Server listening at http://localhost:${port}`)
+server.listen(webPort, () =>
+  log('server', `Server listening at http://localhost:${webPort}`)
 )

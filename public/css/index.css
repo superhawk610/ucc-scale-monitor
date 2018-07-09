@@ -10,5 +10,6 @@ body {
 #output {
   color: #fff;
   padding-top: 100px;
-  font-size: 30vh;
+  font-size: 20vh;
+  padding: 25px;
 }
