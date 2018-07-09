@@ -1,1 +1,29 @@
-function tick(){var t=new Date,n=t.getHours(),o=t.getMinutes(),c="AM";n>12&&(c="PM",n-=12),12==n&&(c="PM"),0==n&&(n=12),$("#clock").text(n+":"+pad(o)+" "+c),setTimeout(function(){tick()},1e3)}function pad(t){return t<10&&(t="0"+t),t}var socket=io();window.onload=function(){socket.on("display",function(t){$("#output").text(t)}),socket.on("notify",function(t){$("#notify").text(t)}),$("#clock").length&&tick()};
+var socket = io()
+var output = document.getElementById('output')
+var ports = []
+
+window.onload = function() {
+  socket.on('init', function(_ports) {
+    ports = _ports
+    var outputs = ''
+
+    for (var i = 0; i < ports.length; i++) {
+      outputs += `
+        <div id="port-${i}">
+          <div class="name">${ports[i]}</div>
+          <div class="data"></div>
+        </div>
+      `
+    }
+
+    output.innerHTML = outputs
+  })
+
+  socket.on('data', function(data) {
+    var port = data.port
+    var portIndex = ports.indexOf(port)
+    var data = data.data
+
+    document.querySelector(`#port-${portIndex} .data`).innerText(data)
+  })
+}
