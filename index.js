@@ -7,69 +7,39 @@
  * serial connections. Keep this in mind when planning use cases.
  */
 
+const opts = require('opts')
 const path = require('path')
 const express = require('express')
 const app = express()
 const server = require('http').createServer(app)
-const io = require('socket.io')(server)
-const SerialPort = require('serialport')
-const Readline = require('@serialport/parser-readline')
+const log = require('./lib/log')
+
+const options = [
+  {
+    short: 'm',
+    long: 'mock',
+    description:
+      'Ignore real serial ports and mock input data for 3 serial inputs.'
+  }
+]
+opts.parse(options, true)
+
+const serial = require('./lib/serial')
+const socket = require('./lib/socket')
 
 const webPort = 5000
-const serialPortAddresses = ['/dev/ttyUSB0']
+const serialPortAddresses = {
+  '/dev/ttyUSBTopLeft': 'topLeft',
+  '/dev/ttyUSBBottomLeft': 'bottomLeft',
+  '/dev/ttyUSBBottomRight': 'bottomRight'
+}
+// const serialPortAddresses = ['/dev/ttyUSB0']
+
+socket.init(server, serialPortAddresses)
+if (opts.get('mock')) serial.mock(serialPortAddresses)
+else serial.init(serialPortAddresses)
 
 app.use(express.static(path.join(__dirname, 'public')))
-
-const log = (tag, message) => {
-  tag = tag.toUpperCase().substring(0, 6)
-  const space = '      '.substring(0, 6 - tag.length)
-  console.log(`${space}[${tag.substring(0, 6)}] ${message}`)
-}
-
-const onOpen = port => () =>
-  setTimeout(
-    () =>
-      port.write('CP\n', err =>
-        log(
-          err ? 'error' : 'serial',
-          err ? err.message : `Continuous printing activated on ${port}`
-        )
-      ),
-    2000
-  )
-
-const onData = port => data =>
-  data.match(/\s(lb|kg)/) &&
-  io.emit('data', {
-    port,
-    data: data
-      .toString()
-      .trim()
-      .split(' ')
-      .slice(0, 2)
-      .join(' ')
-  })
-
-const onError = port => err => log('serial', `Error on ${port}: ${err.message}`)
-
-const serialPorts = serialPortAddresses.map(address =>
-  new SerialPort(address, onError(address)).pipe(
-    new Readline({ delimiter: '\n' })
-  )
-)
-
-serialPorts.forEach(port => {
-  port.on('open', onOpen(port))
-  port.on('data', onData(port))
-})
-
-io.on('connection', socket => {
-  log('socket', `A client connected from ${socket.handshake.address}`)
-  io.emit('init', serialPortAddresses)
-  socket.on('disconnect', () =>
-    log('socket', `The client at ${socket.handshake.address} disconnected`)
-  )
-})
 
 server.listen(webPort, () =>
   log('server', `Server listening at http://localhost:${webPort}`)
