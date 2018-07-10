@@ -28,12 +28,12 @@ const serial = require('./lib/serial')
 const socket = require('./lib/socket')
 
 const webPort = 5000
-const serialPortAddresses = {
-  '/dev/ttyUSBTopLeft': 'topLeft',
-  '/dev/ttyUSBBottomLeft': 'bottomLeft',
-  '/dev/ttyUSBBottomRight': 'bottomRight'
-}
-// const serialPortAddresses = ['/dev/ttyUSB0']
+// const serialPortAddresses = {
+//   '/dev/ttyUSBTopLeft': 'topLeft',
+//   '/dev/ttyUSBBottomLeft': 'bottomLeft',
+//   '/dev/ttyUSBBottomRight': 'bottomRight'
+// }
+const serialPortAddresses = ['/dev/ttyUSB0']
 
 socket.init(server, serialPortAddresses)
 if (opts.get('mock')) serial.mock(serialPortAddresses)

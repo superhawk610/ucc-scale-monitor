@@ -36,3 +36,11 @@ body {
 #output .data {
   font-size: 120px;
 }
+
+#output div:first-child:last-child .name {
+  display: none;
+}
+
+#output div:first-child:last-child .data {
+  font-size: 175px;
+}
